@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "daily/food/food_base.html" %}
+
+{% if messages %}
+  {% for message in messages %}
+    <div>{{ message.message }}</div>
+  {% endfor %}
+{% endif %}
+
+<h4>投稿詳細</h4>
+
+    {% if food_info.image %}
+    <img src="/media/{{ food_info.image }}" alt="投稿画像" width="380" height="232">
+    {% else %}
+    <img src="/media/foods/no_image.jpg" alt="投稿画像" width="380" height="232">
+    {% endif %}
+    <p>タイトル：{{ food_info.title }}</p>
+    <p>料理名：{{ food_info.food_name }}</p>
+    <p>内容：{{ food_info.content }}</p>
+    <p>食事日時：{{ food_info.ate_at }}</p>
+    <p>投稿日時：{{ food_info.created_at }}</p>
+
+    <button id="csv_download_button" type="button" onclick="location.href='{% url 'daily:make_food_detail_download_file' food_info.id %}'">CSVファイルをダウンロード</button>
+
+    <br><br>
+    <a href="{% url 'daily:food_edit' food_info.id %}"><button class="to_food_edit_button">投稿編集へ</button></a>
+    <a href="{% url 'daily:food_delete' food_info.id %}"><button class="to_food_delete_button">投稿削除へ</button></a>
+
+{% endblock %}

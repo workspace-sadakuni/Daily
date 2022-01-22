@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+h4 {
+    margin-bottom: 20px !important;
+}
+
+a {
+  color: black !important;
+  text-decoration: none !important;
+}
+
+button {
+  background-color: #E6DFB7;
+  cursor: pointer;
+}
+
+button:active {
+  -webkit-transform: translate(0,2px);
+  -moz-transform: translate(0,2px);
+  transform: translate(0,2px);
+}
+
+.context {
+    margin: 3% !important;
+    text-align: center;
+}
+
+.input-error {
+    display: inline-block;
+    width: 100%;
+    color: red;
+    font-size: 0.925em;
+    font-weight: 700;
+}
+
+.nav-link:hover {
+  animation: pulsation .9s alternate infinite;
+}
+
+@keyframes pulsation {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1.0); }
+}

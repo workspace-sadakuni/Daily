@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="static/css/index.css">
+        <title>Daily</title>
+    </head>
+
+    <body>
+        <div class="context">
+            <h4>ユーザー作成</h4>
+            <form method="POST">
+                {% csrf_token %}
+                {{ register_form.as_p }}
+                <input type="submit" value="ユーザー登録">
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+django = "==3.0.6"
+django-environ = "==0.4.5"
+gunicorn = "==20.0.4"
+psycopg2-binary = "==2.8.5"
+googlemaps = "==4.4.2"
+pytz = "==2020.1"
+
+[requires]
+python_version = "3.8.10"

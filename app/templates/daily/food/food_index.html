@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "daily/food/food_base.html" %}
+<style type="text/css">
+  #food_table {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+</style>
+
+<link rel="stylesheet" type="text/css" href="static/js/DataTables/datatables.min.css"/>
+<script type="text/javascript" src="static/js/DataTables/datatables.min.js"></script>
+
+<h4>食事投稿一覧</h4>
+
+<div class="food_search_box">
+  食事日時範囲検索:
+  <input type="text" id="start_date">～
+  <input type="text" id="end_date">
+  <button id="food_search" onclick="search_with_date_range()" disabled="disabled"><span>検索</span></button>
+</div>
+
+<table id="food_table" class="table table-bordered">
+  <thead>
+    <tr>
+      <th>タイトル</th>
+      <th>料理名</th>
+      <th>食事日時</th>
+      <th>投稿日時</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+<form>
+  <button id="csv_download_button" type="button" disabled="disabled" onclick="csv_download()">csvファイルをダウンロード</button>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+</form>
+
+<script>
+  function create_datatable() {
+    $("#food_table").DataTable({
+      // デフォルトでソートとするカラムを設定
+      "order": [ [ 2, "desc" ] ],
+      // テーブル内再描画時に既存のテーブル削除をTrueとする
+      "destroy": true,
+      // 非同期処理
+      "ajax": {
+        "url": "{% url 'daily:food_search' %}",
+        "type": "POST",
+        "data": function(d) {
+          food_filter = sessionStorage.getItem('FoodFilter') === null ? "" : JSON.parse(sessionStorage.getItem('FoodFilter'));
+          if (food_filter != ""){
+           d.start_date = food_filter['start_date'];
+           d.end_date = food_filter['end_date'];
+          }
+        },
+        "error": function(jqXHR, textStatus, errorThrown) {
+          $('#food_table').DataTable().clear().draw();
+          $('#food_search').prop('disabled', '');
+        },
+        "beforeSend": function(jqXHR, settings) {
+          jqXHR.setRequestHeader("X-CSRFToken", get_cookie('csrftoken'));
+        }
+      },
+      // ajax返却値を元に各tdを作成
+      "columns": [
+        { data: 'title' },
+        { data: 'food_name' },
+        { data: 'ate_at' },
+        { data: 'created_at' },
+      ],
+      // ajax返却値を元に各trに対しリンクを作成
+      "createdRow": function(row, data, dataIndex) {
+        $(row).attr('data-href', data.href)
+        $(row).addClass("table-link")
+        $(row).click(function(e) {
+            window.location = $(e.target).closest('tr').data('href');
+        });
+        // テーブル描画後、検索ボタンを活性化
+        $('#food_search').prop('disabled', '');
+        // テーブル描画後、csvダウンロードボタンを活性化
+        $('#csv_download_button').prop('disabled', '');
+      },
+    });
+  }
+
+  function search_with_date_range() {
+    $('#food_search').attr('disabled', 'disabled');
+    $('#csv_download_button').attr('disabled', 'disabled');
+    let FilterItems = {
+      'start_date': document.getElementById("start_date").value,
+      'end_date': document.getElementById("end_date").value,
+    };
+
+    sessionStorage.removeItem('FoodFilter');
+    sessionStorage.setItem('FoodFilter', JSON.stringify(FilterItems));
+
+    create_datatable();
+  }
+
+  function csv_download() {
+    $('#csv_download_button').attr('disabled', 'disabled');
+
+    let start_date = ''
+    let end_date = ''
+    let FilterItems = sessionStorage.getItem('FoodFilter') === null ? "" : JSON.parse(sessionStorage.getItem('FoodFilter'));
+    if (FilterItems != ""){
+      start_date = FilterItems.start_date;
+      end_date = FilterItems.end_date;
+    }
+
+    location.href="{% url 'daily:make_food_download_file' %}?start_date=" + start_date + "&end_date=" + end_date;
+  }
+
+  $(document).ready(function () {
+    sessionStorage.removeItem('FoodFilter');
+
+    $('#start_date, #end_date').datetimepicker({
+      step:10, //10分刻み
+      format:'Y-m-d H:i', //フォーマット指定
+    });
+
+    create_datatable();
+  });
+</script>
+
+{% endblock %}

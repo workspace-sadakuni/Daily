@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "daily/food/food_base.html" %}
+
+<h4>投稿削除</h4>
+
+    {% if food_info.image %}
+    <img src="/media/{{ food_info.image }}" alt="投稿画像" width="380" height="232">
+    {% else %}
+    <img src="/media/foods/no_image.jpg" alt="投稿画像" width="380" height="232">
+    {% endif %}
+    <p>タイトル：{{ food_info.title }}</p>
+    <p>料理名：{{ food_info.food_name }}</p>
+    <p>内容：{{ food_info.content }}</p>
+    <p>食事日時：{{ food_info.ate_at }}</p>
+    <p>投稿日時：{{ food_info.created_at }}</p>
+
+    <p class="delete-message" style="color: #660033;"></p>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button id="food_delete_button" type="button" onclick="food_delete({{ food_info.id }})">投稿を削除する</button>
+
+<script>
+let i = 3
+const interval_func = function() {
+    if(i === 0){
+        clearInterval(timer);
+        location.href="{% url 'daily:food_index' %}";
+    }
+    $('.delete-message').text(i + '秒後に投稿一覧画面へ遷移します')
+    i = i - 1;
+}
+
+function food_delete(food_id){
+    $('#food_delete_button').attr('disabled', 'disabled');
+    if(confirm('この投稿を本当に削除しますか？')) {
+        $.ajax({
+            url: '/food_delete/' + food_id,
+            type: "POST",
+            headers: {
+                "X-CSRFToken": get_cookie('csrftoken'),
+            },
+        }).done(function () {
+            $('.delete-message').text('この投稿を削除しました')
+            $('#food_delete_button').before('<progress></progress><br>');
+            timer = setInterval(interval_func, 1000)
+        }).fail(function () {
+            $('.delete-message').text('投稿の削除に失敗しました')
+        }).always(function (data) {
+        });
+    }else {
+        $('#food_delete_button').prop('disabled', '');
+    }
+}
+</script>
+
+{% endblock %}

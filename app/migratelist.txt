@@ -1,0 +1,5 @@
+# マイグレーションファイルの作成。すでに実行済みであれば必要なし
+python3 manage.py makemigrations daily
+
+# マイグレーションファイルをDBに適用。
+python3 manage.py migrate

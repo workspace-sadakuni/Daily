@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "daily/food/food_base.html" %}
+
+{% if messages %}
+  {% for message in messages %}
+    <div>{{ message.message }}</div>
+  {% endfor %}
+{% endif %}
+
+<h4>投稿編集</h4>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ food_edit_form.as_p }}
+    <input id="submit" type="submit" value="更新">
+</form>
+
+<script type="text/javascript">
+      window.onload = $(function () {
+          FoodInputController();
+
+          date = new Date(new Date().setHours(0, 0));
+          $('#id_ate_at').datetimepicker({
+            step:10, //10分刻み
+            format:'Y-m-d H:i', //フォーマット指定
+            maxDate: date, //指定可能日は最大で当日までに指定
+          });
+      });
+</script>
+
+{% endblock %}

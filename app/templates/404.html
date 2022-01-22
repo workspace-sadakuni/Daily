@@ -1,0 +1,17 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/index.css' %}">
+        <title>Daily</title>
+    </head>
+    <body>
+        <div class="context">
+            <h2>{{ title }}</h2>
+            <h4>{{ next_path }}</h4>
+            <h3>指定されたページが見つかりませんでした。</h3>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,25 @@
+.table-link {
+    cursor: pointer;
+}
+
+.table-link:hover {
+    background: #eee;
+}
+
+#food_table {
+    background-color: #E6DFB7;
+}
+
+.food_search_box {
+    text-align: right;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.to_food_edit_button {
+    margin: 5px;
+}
+
+.to_food_delete_button {
+    margin: 5px;
+}

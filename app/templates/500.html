@@ -1,0 +1,21 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/index.css' %}">
+        <title>Daily</title>
+    </head>
+    <body>
+        <div class="context">
+            <h2>{{ title }}</h2>
+            <h3>システムエラーが発生しました。大変申し訳ございません。</h3>
+            <h4>お手数ですが、しばらく時間をおいてから再度お試しください。</h4>
+        </div>
+
+        <div class="context">
+            <p>エラー詳細：{{ dump_file }}</p>
+        </div>
+    </body>
+</html>

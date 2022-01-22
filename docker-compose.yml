@@ -1,0 +1,50 @@
+version: "3.7"
+services:
+  django:
+    # コンテナ名
+    container_name: django
+    # ビルドするdockerファイルが格納されたディレクトリ
+    build: ./app
+    # 正常起動後に実行するコマンド
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      # マウントするディレクトリ
+      - ./app:/usr/src/app/
+    ports:
+      # ホスト側のポート：コンテナ側のポート
+      - 8000:8000
+    env_file:
+      # 環境変数に設定するファイル
+      - ./app/.env
+    depends_on:
+      # 接続するサービス
+      - postgres
+
+  postgres:
+    container_name: postgres
+    build: ./postgres
+    volumes:
+      # DBのデータはボリュームを作成して保存
+      # ディレクトリとマウントとって実データをホストOSに直接残しても良い
+      # /var/lib/postgresql/dataにDBのデータが格納されている
+      - sample_postgres_data:/var/lib/postgresql/data
+      # down -vなどでボリュームがない時などを含めた初回起動時に実行されるファイルを指定
+      - ./postgres/sql:/docker-entrypoint-initdb.d
+    env_file: ./postgres/.env_db
+    ports:
+      # ホスト側のポートはローカルのpsqlとバッティングするので5432以外にする
+      - 5433:5432
+
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    volumes:
+      - ./app/static:/usr/src/app/static
+      - ./app/media:/usr/src/app/media
+    ports:
+      - 80:80
+    depends_on:
+      - django
+
+volumes:
+  sample_postgres_data:

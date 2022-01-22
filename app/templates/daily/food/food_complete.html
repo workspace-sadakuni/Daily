@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h4>投稿が完了しました。</h4>
+
+<a href="{% url 'daily:food_input' %}" style="margin: 5px;"><button>投稿画面へ</button></a>
+<a href="{% url 'daily:food_detail' food_id %}" style="margin: 5px;"><button>投稿詳細画面へ</button></a>
+{% endblock %}
