@@ -27,6 +27,8 @@ $docker-compose start
 $docker-compose stop  
 #apサーバーコンソールログ確認  
 $docker logs -f django  
+#コンテナ内へ接続(django=コンテナ名)  
+$docker exec -it django bash  
 
 
 #### 本番環境サーバー起動方法
