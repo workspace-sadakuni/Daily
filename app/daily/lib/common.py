@@ -64,8 +64,6 @@ def delete_media_file(image=None):
             image_path = os.path.join(settings.MEDIA_ROOT, image)
             os.remove(image_path)
         except FileNotFoundError as e:
-            logger.error('---the file below was not be found---\n' + image)
             logger.error(e)
         except Exception as e:
-            logger.error('---fail to delete the file below---\n' + image)
             logger.error(e)

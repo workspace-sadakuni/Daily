@@ -132,10 +132,10 @@ def user_delete(request):
         try:
             user_info.delete()
         except Exception as e:
-            logger.error('---user_id:' + str(request.user_id) + ' could not be deleted---')
+            logger.error(f'---user_id: {request.user_id} could not be deleted---')
             logger.error(e)
             raise Exception
-        logger.info('---user_id:' + str(request.user_id) + ' was successfully deleted.---')
+        logger.info(f'---user_id: {request.user_id} was successfully deleted---')
 
         return HttpResponse(status=200)
     else:
