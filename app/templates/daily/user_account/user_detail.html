@@ -5,18 +5,17 @@
 
 <h4>ユーザー詳細</h4>
 
-    {% for user_info in user_info %}
-        {% if user_info.picture %}
-        <img src="/media/{{ user_info.picture }}" alt="ユーザー画像" width="384" height="228">
-        {% else %}
-        <img src="/media/profile/default.jpg" alt="ユーザー画像" width="384" height="228">
-        {% endif %}
-        <p>ユーザー名：{{ user_info.username }}</p>
-        <p>年齢：{{ user_info.age }}歳</p>
-        <p>メールアドレス：{{ user_info.email }}</p>
-    {% endfor %}
+    {% if user_info.picture %}
+    <img src="/media/{{ user_info.picture }}" alt="ユーザー画像" width="384" height="228">
+    {% else %}
+    <img src="/media/profile/default.jpg" alt="ユーザー画像" width="384" height="228">
+    {% endif %}
+    <p>ユーザー名：{{ user_info.username }}</p>
+    <p>年齢：{{ user_info.age }}歳</p>
+    <p>メールアドレス：{{ user_info.email }}</p>
 
 <br><br>
 <a href="{% url 'daily:user_edit' %}"><button>ユーザー編集へ</button></a>
+<a href="{% url 'daily:user_delete' %}"><button class="to_user_delete_button">ユーザー削除へ</button></a>
 
 {% endblock %}

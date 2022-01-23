@@ -14,6 +14,7 @@ urlpatterns = [
     path('user_detail', user_account.user_detail, name='user_detail'),
     path('user_edit', user_account.user_edit, name='user_edit'),
     path('change_password', user_account.change_password, name='change_password'),
+    path('user_delete', user_account.user_delete, name='user_delete'),
 
     path('food_input', food.food_input, name='food_input'),
     path('food_complete/<int:food_id>', food.food_complete, name='food_complete'),

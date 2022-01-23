@@ -4,3 +4,11 @@ img {
     border-radius: 50%;
     margin-bottom: 20px;
 }
+
+.to_user_edit_button {
+    margin: 5px;
+}
+
+.to_user_delete_button {
+    margin: 5px;
+}

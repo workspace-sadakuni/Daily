@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/user_account.css' %}">
+
+<h4>ユーザー削除</h4>
+
+    {% if user_info.picture %}
+    <img src="/media/{{ user_info.picture }}" alt="ユーザー画像" width="384" height="228">
+    {% else %}
+    <img src="/media/profile/default.jpg" alt="ユーザー画像" width="384" height="228">
+    {% endif %}
+    <p>ユーザー名：{{ user_info.username }}</p>
+    <p>年齢：{{ user_info.age }}歳</p>
+    <p>メールアドレス：{{ user_info.email }}</p>
+
+<br><br>
+<p class="delete-message" style="color: #660033;"></p>
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<button id="user_delete_button" type="button" onclick="user_delete()">ユーザーを削除する</button>
+
+<script>
+let i = 3
+const interval_func = function() {
+    if(i === 0){
+        clearInterval(timer);
+        location.href="{% url 'daily:user_logout' %}";
+    }
+    $('.delete-message').text(i + '秒後にログイン画面へ遷移します')
+    i = i - 1;
+}
+
+function user_delete(food_id){
+    $('#user_delete_button').attr('disabled', 'disabled');
+    if(confirm('このユーザーを本当に削除しますか？')) {
+        $.ajax({
+            url: "{% url 'daily:user_delete' %}",
+            type: "POST",
+            headers: {
+                "X-CSRFToken": get_cookie('csrftoken'),
+            },
+        }).done(function () {
+            $('.delete-message').text('このユーザーを削除しました')
+            document.cookie = "daily-session-key=; max-age=0";
+            $('#user_delete_button').before('<progress></progress><br>');
+            timer = setInterval(interval_func, 1000)
+        }).fail(function () {
+            $('.delete-message').text('ユーザーの削除に失敗しました')
+        }).always(function (data) {
+        });
+    }else {
+        $('#user_delete_button').prop('disabled', '');
+    }
+}
+</script>
+
+{% endblock %}

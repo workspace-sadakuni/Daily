@@ -51,18 +51,3 @@ function add_trigger(input_elements){
         input_element.trigger("change");
     }
 }
-
-function get_cookie(name){
-    let cookie_value = null;
-    if(document.cookie && document.cookie != '') {
-        let cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = jQuery.trim(cookies[i]);
-            if(cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookie_value = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookie_value;
-}

@@ -1,3 +1,4 @@
+import logging
 import os
 import pytz
 import re
@@ -8,6 +9,9 @@ from pytz import timezone
 from django.utils.translation import get_language
 
 from const import const
+from django.conf import settings
+
+logger = logging.getLogger('application')
 
 
 def get_browser_lang():
@@ -52,3 +56,16 @@ def jst_string_to_utc_datetime(jst_string):
         utc_datetime = jst_datetime.astimezone(pytz.timezone('UTC'))
 
     return utc_datetime
+
+
+def delete_media_file(image=None):
+    if image:
+        try:
+            image_path = os.path.join(settings.MEDIA_ROOT, image)
+            os.remove(image_path)
+        except FileNotFoundError as e:
+            logger.error('---the file below was not be found---\n' + image)
+            logger.error(e)
+        except Exception as e:
+            logger.error('---fail to delete the file below---\n' + image)
+            logger.error(e)
