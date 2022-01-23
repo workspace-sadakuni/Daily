@@ -5,7 +5,7 @@ from config.settings.common import *
 
 SECRET_KEY = '*uma=anyry6!5zcx@^2k7lr&ejr6bsd&74t@w6lqo%lsfa9=rc'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 

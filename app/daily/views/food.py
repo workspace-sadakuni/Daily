@@ -120,11 +120,11 @@ def food_delete(request, food_id):
         try:
             food_info.delete()
         except Exception as e:
-            logger.error('---food_id:' + str(food_id) + ' could not be deleted---')
+            logger.error(f'---food_id: {food_id} could not be deleted---')
             logger.error(e)
             raise Exception
         else:
-            logger.info('---food_id:' + str(food_id) + ' was successfully deleted.---')
+            logger.info(f'---food_id:{food_id} was successfully deleted---')
 
         return HttpResponse(status=200)
     else:
