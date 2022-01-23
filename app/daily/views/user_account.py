@@ -5,14 +5,15 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.crypto import get_random_string
 
 from django.conf import settings
 from const.const import COOKIE_SESSION_KEY
 from daily import forms
-from daily.models import Users, UserSessions
+from daily.lib.common import delete_media_file
+from daily.models import Users, UserSessions, PostFoods
 
 logger = logging.getLogger('application')
 
@@ -37,8 +38,8 @@ def user_login(request):
         user = authenticate(email=email, password=password)
         if user:
             if user.is_active:
-                # ログイン処理
-                login(request, user)
+                # ログイン処理(下記コメントアウト処理はLoginView実装時のものだが、Middleware側処理daily-session-keyにて管理するため不要となる。)
+                # login(request, user)
 
                 response = render(request, 'daily/home.html')
                 session_key = get_random_string(64)
@@ -59,17 +60,15 @@ def user_login(request):
 
 
 def user_logout(request):
-    logout(request)
+    # ログアウト処理(下記コメントアウト処理はLoginView実装時のものだが、Middleware側処理daily-session-keyにて管理するため不要となる。)
+    # logout(request)
     messages.success(request, 'ログアウトしました。')
     return redirect('daily:user_login')
 
 
 def user_detail(request):
-    user_info = Users.objects.filter(id=request.user_id)
-    if user_info:
-        return render(request, 'daily/user_account/user_detail.html', context={'user_info': user_info})
-    else:
-        raise Http404
+    user_info = get_object_or_404(Users, id=request.user_id)
+    return render(request, 'daily/user_account/user_detail.html', context={'user_info': user_info})
 
 
 def user_edit(request):
@@ -90,18 +89,7 @@ def user_edit(request):
 
             # 更新前後でユーザー画像が異なるかつ、更新前画像が存在する場合に更新前画像ファイルを削除
             if current_picture != updated_picture and current_picture is not None:
-                try:
-                    previous_picture = os.path.join(settings.MEDIA_ROOT, current_picture)
-                    os.remove(previous_picture)
-                except UnboundLocalError as e:
-                    logger.error('---could not parse the previous user file---')
-                    logger.error(e)
-                except FileNotFoundError as e:
-                    logger.error('---the file below was not be found---\n' + previous_picture)
-                    logger.error(e)
-                except Exception as e:
-                    logger.error('---fail to delete the file below---\n' + previous_picture)
-                    logger.error(e)
+                delete_media_file(current_picture)
             return redirect('daily:user_detail')
         else:
             return render(request, 'daily/user_account/user_edit.html', context={'user_edit_form': user_edit_form})
@@ -116,8 +104,39 @@ def change_password(request):
         try:
             password_change_form.save()
             messages.success(request, 'パスワードの更新が完了しました。')
-            # パスワード更新後、セッション情報を更新
-            update_session_auth_hash(request, user)
+            # パスワード更新後、セッション情報を更新。(下記コメントアウト処理はLoginView実装時のものだが、Middleware側処理daily-session-keyにて管理するため不要となる。)
+            # update_session_auth_hash(request, user)
         except ValidationError as e:
             password_change_form.add_error('password', e)
     return render(request, 'daily/user_account/change_password.html', context={'password_change_form': password_change_form})
+
+
+def user_delete(request):
+    user_info = get_object_or_404(Users, id=request.user_id)
+
+    if request.method == "POST":
+        food_info = PostFoods.objects.filter(user_id=request.user_id)
+        for i, food_info_row in enumerate(food_info):
+            food_image = str(food_info_row.image) if str(food_info_row.image) else None
+            # 削除対象のユーザーに紐づく投稿画像ファイルを削除
+            delete_media_file(food_image)
+        try:
+            # 削除対象のユーザーに紐づく投稿データを削除
+            food_info.delete()
+        except Exception as e:
+            logger.error(e)
+
+        # 削除するユーザー画像情報を取得。存在しない場合Noneを代入
+        user_image = str(user_info.picture) if str(user_info.picture) else None
+        delete_media_file(user_image)
+        try:
+            user_info.delete()
+        except Exception as e:
+            logger.error('---user_id:' + str(request.user_id) + ' could not be deleted---')
+            logger.error(e)
+            raise Exception
+        logger.info('---user_id:' + str(request.user_id) + ' was successfully deleted.---')
+
+        return HttpResponse(status=200)
+    else:
+        return render(request, 'daily/user_account/user_delete.html', context={'user_info': user_info})

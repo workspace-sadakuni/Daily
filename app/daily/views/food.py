@@ -10,7 +10,7 @@ from pytz import timezone
 
 from django.conf import settings
 from daily import forms
-from daily.lib.common import utc_datetime_to_jst_datetime_format, jst_string_to_utc_datetime
+from daily.lib.common import utc_datetime_to_jst_datetime_format, jst_string_to_utc_datetime, delete_media_file
 from daily.lib.food import FoodInfoDao
 from daily.models import Users, PostFoods
 
@@ -84,7 +84,7 @@ def food_detail(request, food_id):
 def food_edit(request, food_id):
     # 現在の食事投稿情報を取得
     current_food = get_object_or_404(PostFoods, id=food_id, user_id=request.user_id)
-    # 編集画面表示用に食事日時をフォーマット
+    # 画面表示用に食事日時をフォーマット
     current_food.ate_at = utc_datetime_to_jst_datetime_format(current_food.ate_at)
     food_edit_form = forms.FoodInputForm(request.POST or None, request.FILES or None, instance=current_food)
 
@@ -101,16 +101,7 @@ def food_edit(request, food_id):
 
             # 更新前後で食事投稿画像が異なるかつ、更新前画像が存在する場合に更新前画像ファイルを削除
             if current_image != updated_image and current_image is not None:
-                try:
-                    previous_image = os.path.join(settings.MEDIA_ROOT, current_image)
-                    os.remove(previous_image)
-                except FileNotFoundError as e:
-                    logger.error('---the file below was not be found---\n' + previous_image)
-                    logger.error(e)
-                    raise e
-                except Exception as e:
-                    logger.error('---fail to delete the file below---\n' + previous_image)
-                    logger.error(e)
+                delete_media_file(current_image)
             return redirect('daily:food_detail', food_id=food_id)
         else:
             return render(request, 'daily/food/food_edit.html', context={'food_edit_form': food_edit_form})
@@ -124,6 +115,7 @@ def food_delete(request, food_id):
     if request.method == "POST":
         # 削除する食事投稿画像情報を取得。存在しない場合Noneを代入
         food_image = str(food_info.image) if str(food_info.image) else None
+        delete_media_file(food_image)
 
         try:
             food_info.delete()
@@ -131,19 +123,8 @@ def food_delete(request, food_id):
             logger.error('---food_id:' + str(food_id) + ' could not be deleted---')
             logger.error(e)
             raise Exception
-        logger.info('---food_id:' + str(food_id) + ' was successfully deleted.---')
-
-        try:
-            # 削除対象の投稿画像が存在する場合、画像ファイルを削除
-            if food_image is not None:
-                image = os.path.join(settings.MEDIA_ROOT, food_image)
-                os.remove(image)
-        except FileNotFoundError as e:
-            logger.error('---the file below was not be found---\n' + image)
-            logger.error(e)
-        except Exception as e:
-            logger.error('---fail to delete the file below---\n' + image)
-            logger.error(e)
+        else:
+            logger.info('---food_id:' + str(food_id) + ' was successfully deleted.---')
 
         return HttpResponse(status=200)
     else:
