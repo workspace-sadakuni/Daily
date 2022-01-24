@@ -6,7 +6,7 @@ from django.utils.deprecation import MiddlewareMixin
 from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect, reverse
 
-from daily.models import UserSessions
+from daily.models import Users, UserSessions, UserAccessLogs
 from daily.views import user_account
 from django.conf import settings
 
@@ -59,17 +59,18 @@ class SessionCheck(MiddlewareMixin):
                         return response
                 else:
                     # ユーザー情報取得
-                    user_data = UserSessions.objects.filter(session_key=getcookie).values(
-                        'id',
-                        'last_used_at',
-                        'user_id__id',  # users.id
-                        'user_id__email'  # users.email
-                    )[0]
-                    request.session_id = user_data['id']
-                    request.user_id = user_data['user_id__id']
-                    request.email = user_data['user_id__email']
+                    user_data = UserSessions.objects.select_related('user_id').get(session_key=getcookie)
+                    # request.userに取得したusersテーブルのinstanceを保持させ、アクセスログ書き込み時に使用する。
+                    request.user = user_data.user_id
+                    request.user_id = user_data.user_id.id
+                    request.username = user_data.user_id.username
+                    request.user_email = user_data.user_id.email
+                    request.session_id = user_data.id
 
                     UserSessions.objects.filter(session_key=getcookie).update(last_used_at=now)
+
+                    # 現在時刻をrequestに保持（process_responce側でこの時刻を使ってログに処理時間を記録）
+                    request.logging_start_dt = now
 
                     if view_func == user_account.user_login:
                         logger.debug('ログインへのアクセスだがsessionを保持しているためホーム画面へ繊維')
@@ -105,3 +106,55 @@ class SessionCheck(MiddlewareMixin):
                 return HttpResponseForbidden()
             else:
                 return redirect_to_login(request.path, '/')
+
+    def process_response(self, request, response):
+        """view処理後"""
+        # Access Log書き込み
+        # logging_start_dtが設定されている場合（有効なセッションが存在）のみ書き込む
+        if getattr(request, 'logging_start_dt', 0) != 0:
+            delta = datetime.datetime.now(datetime.timezone.utc) - request.logging_start_dt
+            response.logging_response_time = delta.seconds * 1000 + delta.microseconds / 1000
+            access_log(request, response)
+
+        return response
+
+
+def access_log(request, response):
+    """Acess Logの書き込み処理"""
+
+    # リクエスト情報を取得
+    request_url = request.path_info
+    request_method = request.META["REQUEST_METHOD"] if 'REQUEST_METHOD' in request.META else ''
+    referer = request.META["HTTP_REFERER"] if 'HTTP_REFERER' in request.META else ''
+    user_agent = request.META["HTTP_USER_AGENT"] if 'HTTP_USER_AGENT' in request.META else ''
+
+    source_ip_list = request.META.get('HTTP_X_FORWARDED_FOR')
+    if source_ip_list:
+        # ip_listに記録されたIPアドレスが複数ある場合、ネットワーク構成などを考慮して添字を指定する。
+        source_ip = source_ip_list.split(',')[0]
+    else:
+        source_ip = request.META.get('REMOTE_ADDR')
+        if source_ip is None:
+            source_ip = ''
+
+    user = Users.objects.filter(id=request.user_id)
+
+    # ユーザーが存在する場合のみアクセスログを記録。ユーザー削除時にはユーザーは存在せずDBエラーとなるため記録しない。
+    if len(user):
+        log = UserAccessLogs(
+            request_at=request.logging_start_dt,
+            response_at=datetime.datetime.now(datetime.timezone.utc),
+            user_id=request.user,
+            username=request.username,
+            user_email=request.user_email,
+            request_method=request_method,
+            request_url=request_url,
+            referer=referer,
+            source_ip=source_ip,
+            user_agent=user_agent,
+            session_id=request.session_id,
+            session_key=request.COOKIES.get('daily-session-key'),
+            response_time=response.logging_response_time,
+            status_code=getattr(response, 'status_code', 0)
+        )
+        log.save()
