@@ -15,7 +15,7 @@ services:
       - 8000:8000
     env_file:
       # 環境変数に設定するファイル
-      - ./app/.env
+      - ./app/.env_develop
     depends_on:
       # 接続するサービス
       - postgres
