@@ -41,7 +41,7 @@ def user_login(request):
                 # ログイン処理(下記コメントアウト処理はLoginView実装時のものだが、Middleware側処理daily-session-keyにて管理するため不要となる。)
                 # login(request, user)
 
-                response = render(request, 'daily/home.html')
+                response = redirect('daily:home')
                 session_key = get_random_string(64)
 
                 # ログインセッション作成
