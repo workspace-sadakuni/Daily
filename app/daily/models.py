@@ -33,6 +33,26 @@ class UserSessions(models.Model):
         db_table = 'user_sessions'
 
 
+class UserAccessLogs(models.Model):
+    request_at = models.DateTimeField(blank=True, null=True)
+    response_at = models.DateTimeField(blank=True, null=True)
+    user_id = models.ForeignKey(Users, models.CASCADE, db_column='user_id')
+    username = models.TextField(blank=True)
+    user_email = models.TextField(blank=True)
+    request_method = models.TextField(blank=True)
+    request_url = models.TextField(blank=True)
+    referer = models.TextField(blank=True)
+    source_ip = models.TextField(blank=True)
+    user_agent = models.TextField(blank=True)
+    session_id = models.IntegerField(blank=True)
+    session_key = models.TextField(blank=True)
+    response_time = models.IntegerField(blank=True)
+    status_code = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'user_access_logs'
+
+
 class PostFoods(models.Model):
     user_id = models.ForeignKey(Users, models.CASCADE, db_column='user_id')
     title = models.TextField(blank=True)
