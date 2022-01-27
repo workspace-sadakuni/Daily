@@ -12,7 +12,7 @@ SECRET_KEY = env.get_value('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = env.get_value('ALLOWED_HOSTS')
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
