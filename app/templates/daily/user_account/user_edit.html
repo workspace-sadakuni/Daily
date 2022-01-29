@@ -9,11 +9,13 @@
 
 <h4>ユーザー編集</h4>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ user_edit_form.as_p }}
-    <input type="submit" value="ユーザー情報を更新">
-</form>
+<div class="form">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ user_edit_form.as_p }}
+        <input type="submit" value="ユーザー情報を更新">
+    </form>
+</div>
 
 <br>
 <a href="{% url 'daily:change_password' %}"><button>パスワード変更をする</button></a>

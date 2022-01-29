@@ -10,11 +10,13 @@
 
 <h4>投稿編集</h4>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ food_edit_form.as_p }}
-    <input id="submit" type="submit" value="更新">
-</form>
+<div class="form">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ food_edit_form.as_p }}
+        <input id="submit" type="submit" value="更新">
+    </form>
+</div>
 
 <script type="text/javascript">
       window.onload = $(function () {

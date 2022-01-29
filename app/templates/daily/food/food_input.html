@@ -4,11 +4,13 @@
 
 <h4>食事を投稿しよう！</h4>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ food_input_form.as_p }}
-    <input id="submit" type="submit" value="投稿" disabled="disabled">
-</form>
+<div class="form">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ food_input_form.as_p }}
+        <input id="submit" type="submit" value="投稿" disabled="disabled">
+    </form>
+</div>
 
 <script type="text/javascript">
       window.onload = $(function () {
