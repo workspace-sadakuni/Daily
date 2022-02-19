@@ -6,6 +6,14 @@
     background: #eee;
 }
 
+#start_date {
+    text-align: center;
+}
+
+#end_date {
+    text-align: center;
+}
+
 #food_table {
     background-color: #E6DFB7;
 }
